@@ -332,6 +332,17 @@ fi
 # Toggle comment at the start of the line.
 bindkey -M vicmd "#" vi-pound-insert
 
+if (( $+widgets[history-incremental-pattern-search-backward] )); then
+  bindkey -M viins "$key_info[Control]R" \
+    history-incremental-pattern-search-backward
+  bindkey -M viins "$key_info[Control]S" \
+    history-incremental-pattern-search-forward
+else
+  bindkey -M viins "$key_info[Control]R" \
+    history-incremental-search-backward
+  bindkey -M viins "$key_info[Control]S" \
+    history-incremental-search-forward
+fi
 #
 # Emacs and Vi Key Bindings
 #
@@ -426,6 +437,7 @@ for keymap in 'emacs' 'viins'; do
 
   # Insert 'sudo ' at the beginning of the line.
   bindkey -M "$keymap" "$key_info[Control]X$key_info[Control]S" prepend-sudo
+  bindkey -M "$keymap" "$key_info[Escape]s" prepend-sudo
 
   # control-space expands all aliases, including global
   bindkey -M "$keymap" "$key_info[Control] " glob-alias

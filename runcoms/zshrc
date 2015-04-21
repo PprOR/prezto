@@ -11,3 +11,44 @@ if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
 fi
 
 # Customize to your needs...
+
+# Viewers
+alias -s c="vim"
+alias -s js="vim"
+alias -s t2t="vim"
+alias -s txt="vim"
+alias -s pdf="google-chrome-stable"
+alias -s jpg="google-chrome-stable"
+alias -s html="google-chrome-stable"
+alias -s htm="google-chrome-stable"
+alias -s md="less"
+alias -s avi="mplayer"
+alias -s mp4="mplayer"
+
+# todo
+alias td="todo.sh"
+alias tda="todo.sh a"
+alias tde="vim ~/.todo.txt"
+alias tdd="todo.sh do"
+alias tdr="todo.sh rm"
+alias tdl="todo.sh ls"
+alias tdla="todo.sh lsa"
+
+# utilities
+alias grep="grep -n --color=auto"
+alias -g vless="/usr/share/vim/vim74/macros/less.sh"
+alias la="ls -a"
+alias ll="ls -hl"
+alias lla="ls -hla"
+alias mv=' timeout 8 mv -iv'
+alias rm=' timeout 3 rm -Iv --one-file-system'
+alias s="sudo -E zsh"
+alias sudo="sudo -E"
+alias -g L="| less"
+alias -g G="| grep --color=auto"
+alias pg='ping google.com'
+
+# style
+zstyle ':completion:*:*:kill:*' list-colors '=(#b) #([0-9]#)*( *[a-z])*=34=31=33'
+zstyle ':completion:*:options' list-colors '=^(-- *)=33'
+zstyle ':completion:*:directory-stack' list-colors '=(#b) #([0-9]#) -- (*)==31=33'

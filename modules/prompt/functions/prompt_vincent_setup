@@ -1,0 +1,108 @@
+# 
+# A very adaptative prompt, warning when logged as root or remote
+# and displaying activated virtualenv as well as battery level if
+# available
+#
+# vincent.desprez@gmail.com
+#
+
+# TODO
+#function prompt_vincent_help {
+    #cat <<EOT
+#You can customize this prompt's symbol and colors:
+
+  #prompt vincent [<symbol>] [<color1>] [<color2>]
+
+#In ~/.zpreztorc:
+  #zstyle ':prezto:module:prompt' theme 'vincent' ['<symbol>'] ['<color1>'] ['<color2>']
+
+#If these options are not provided, the symbol defaults to $ with colors cyan
+#and green.
+#EOT
+#}
+
+function _batt {
+    local PR_BATTERY=""
+    if which acpi &> /dev/null; then
+        local BATTSTATE="$(acpi -b)"
+        local BATTPRCNT="$(echo ${BATTSTATE[(w)4]}|sed -r 's/(^[0-9]+).*/\1/')"
+        local BATTSTATUS="$(echo ${BATTSTATE[(w)3]})"
+        if [[ -z "${BATTPRCNT}" ]]; then
+            PR_BATTERY=""
+        elif [[ "${BATTPRCNT}" -lt 15 ]]; then
+            PR_BATTERY="%{%F{red}%} batt:${BATTPRCNT}%%%f"
+        elif [[ "${BATTPRCNT}" -lt 60 ]]; then
+            PR_BATTERY="%{%F{yellow}%} batt:${BATTPRCNT}%%%f"
+        elif [[ "${BATTPRCNT}" -lt 100 ]]; then
+            PR_BATTERY="%{%F{green}%} batt:${BATTPRCNT}%%%f"
+        else
+            PR_BATTERY=""
+        fi  
+    fi  
+    if [[ "${BATTSTATUS}" = "Charging," ]]; then
+        PR_BATTERY="%{%F{yellow}%}⚡%f "$PR_BATTERY 
+    fi
+    echo $PR_BATTERY
+}
+
+function _host {
+    local USER=`whoami`
+    local HOST="%{%F{cyan}%}${SSH_TTY:+SSH }%f"
+
+    if [[ -n $SSH_CLIENT || $USER != "vincent" ]]; then
+        HOST=$HOST"%F{%(!.red.green)}%n%f@%{%F{yellow}%}%M%{%f%}%f "
+    fi
+    echo $HOST
+}
+
+function prompt_vincent_precmd {
+  # Replace '/home/<user>' with '~'.
+  #_prompt_vincent_pwd="${PWD/#$HOME/~}"
+  vcs_info
+  python-info
+  zle -N zle-line-init
+  zle -N zle-keymap-select
+}
+
+function prompt_vincent_setup {
+  setopt LOCAL_OPTIONS
+  unsetopt XTRACE KSH_ARRAYS
+  prompt_opts=(cr percent subst)
+
+  # Load required functions.
+  autoload -Uz vcs_info
+  autoload -Uz add-zsh-hook
+
+  # Add hook to set up prompt parameters before each command.
+  add-zsh-hook precmd prompt_vincent_precmd
+
+  # Set editor-info parameters.
+  #zstyle ':prezto:module:editor:info:completing' format '%F{green}...%f'
+  #zstyle ':prezto:module:editor:info:keymap:alternate' format '%F{yellow}--- COMMAND ---%f'
+  
+  zstyle ':prezto:module:python:info:virtualenv' format ' %v'
+
+  # Set vcs_info parameters.
+  zstyle ':vcs_info:*' enable bzr git hg svn
+  zstyle ':vcs_info:*' check-for-changes true
+  zstyle ':vcs_info:hg*' check-for-changes true
+  zstyle ':vcs_info:*' formats ' %s:<%F{yellow}%b%f%c>%u'
+  zstyle ':vcs_info:*' actionformats ' %s:<%F{yellow}%b%f%c>%u %F{magenta}(%a)%f'
+  zstyle ':vcs_info:*' stagedstr '%F{green}+%f'
+  zstyle ':vcs_info:*' unstagedstr '%F{green}!%f'
+
+  # editor mode
+  zstyle ':prezto:module:editor:info:keymap:primary' format '%F{green}$%f'
+  zstyle ':prezto:module:editor:info:keymap:primary:insert' format '%F{blue}$%f'
+  zstyle ':prezto:module:editor:info:keymap:primary:overwrite' format '%F{yellow}$%f'
+  zstyle ':prezto:module:editor:info:keymap:alternate' format '$'
+  zstyle ':prezto:module:editor:info:completing' format '...'
+
+  # Define prompts.
+  PROMPT="╭─$(_host)%{%B%F{blue}%} %~%f%b"'${vcs_info_msg_0_}
+╰─%{$FG[059]%}${python_info[virtualenv]}%f %B${editor_info[keymap]}%b '
+  RPROMPT=' %(?.$(_batt).%{%F{red}%}%? ↵%f)'
+}
+
+prompt_vincent_setup "$@"
+
